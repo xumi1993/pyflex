@@ -497,8 +497,8 @@ class WindowSelector(object):
             warnings.warn(msg, PyflexWarning)
             return False
 
-        logger.info("Global SNR checks passed. Integrated SNR: %f, Amplitude "
-                    "SNR: %f" % (snr_int, snr_amp))
+        logger.info("Global SNR checks passed. Integrated SNR: %.2E, Amplitude "
+                    "SNR: %.2E" % (snr_int, snr_amp))
         return True
 
     def calculate_ttimes(self):
