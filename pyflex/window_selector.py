@@ -794,7 +794,7 @@ class WindowSelector(object):
             if not (tshift_min < win.cc_shift *
                     self.observed.stats.delta < tshift_max):
                 _cc_shift_sec = win.cc_shift * self.synthetic.stats.delta
-                logger.debug("Window rejected due to time shift: %f" %
+                logger.debug("Window rejected due to time shift: %.2f" %
                              _cc_shift_sec)
                 return False
             return True
