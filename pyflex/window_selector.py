@@ -271,7 +271,15 @@ class WindowSelector(object):
         if not len(self.peaks) and len(self.troughs):
             return
 
+        # Try to use theoretical arrival times to curtail the bounds of the
+        # troughs, which should slim down the total number of window choices
+        # that can be considered, this doesn't always work so it has a fallback
+        # 
         if self.ttimes:
+            # Retain original peaks and troughs incase this doesn't work
+            _peaks = self.peaks
+            _troughs = self.troughs
+
             offset = self.event.origin_time - self.observed.stats.starttime
             min_time = self.ttimes[0]["time"] - \
                 self.config.max_time_before_first_arrival + offset
@@ -290,8 +298,11 @@ class WindowSelector(object):
             self.troughs = self.troughs[(self.troughs >= min_idx) &
                                         (self.troughs <= max_idx)]
 
-            # If troughs have been removed, readd them add the boundaries.
-            if len(self.troughs):
+            # If the first or last trough was removed from the rejected points,
+            # replace them so we know our boundaries
+            if self.troughs:
+                logger.debug("Using theoretical first arrival %.2fs to curtail "
+                             "STA/LTA selection" % min_time)
                 if first_trough != self.troughs[0]:
                     self.troughs = np.concatenate([
                         np.array([min_idx], dtype=self.troughs.dtype),
@@ -300,10 +311,18 @@ class WindowSelector(object):
                     self.troughs = np.concatenate([
                         self.troughs,
                         np.array([max_idx], dtype=self.troughs.dtype)])
-            # Make sure peaks are inside the troughs!
-            min_trough, max_trough = self.troughs[0], self.troughs[-1]
-            self.peaks = self.peaks[(self.peaks > min_trough) &
-                                    (self.peaks < max_trough)]
+
+                # Make sure peaks are inside the troughs!
+                min_trough, max_trough = self.troughs[0], self.troughs[-1]
+                self.peaks = self.peaks[(self.peaks > min_trough) &
+                                        (self.peaks < max_trough)]
+            # Edge case where this processing removes all potential troughs. 
+            # This often occurs when source-receiver distance is short w.r.t 
+            # wavelengths. In this case we just move on like this never 
+            # happend
+            else:
+                self.peaks = _peaks
+                self.troughs = _troughs
 
     def select_windows(self):
         """
