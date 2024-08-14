@@ -300,7 +300,7 @@ class WindowSelector(object):
 
             # If the first or last trough was removed from the rejected points,
             # replace them so we know our boundaries
-            if self.troughs:
+            if self.troughs.any():
                 logger.debug("Using theoretical first arrival %.2fs to curtail "
                              "STA/LTA selection" % min_time)
                 if first_trough != self.troughs[0]:
