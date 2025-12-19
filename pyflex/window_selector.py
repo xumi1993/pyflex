@@ -868,7 +868,7 @@ class WindowSelector(object):
             raise PyflexError("Observed and synthetic data must have the same "
                               "starttime.")
 
-        ptp = sorted([self.observed.data.ptp(), self.synthetic.data.ptp()])
+        ptp = sorted([np.ptp(self.observed.data), np.ptp(self.synthetic.data)])
         if ptp[1] / ptp[0] >= 5:
             warnings.warn("The amplitude difference between data and "
                           "synthetic is fairly large.")
